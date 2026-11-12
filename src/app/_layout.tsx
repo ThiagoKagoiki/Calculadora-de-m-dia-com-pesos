@@ -1,18 +1,25 @@
-import { DarkTheme, DefaultTheme, ThemeProvider } from 'expo-router';
-import * as SplashScreen from 'expo-splash-screen';
-import { useColorScheme } from 'react-native';
+// Define a navegação em "pilha": cada tela abre por cima da anterior,
+// com botão de voltar e título no topo.
+import { cores } from '@/constants/tema';
+import { Stack } from 'expo-router';
 
-import { AnimatedSplashOverlay } from '@/components/animated-icon';
-import AppTabs from '@/components/app-tabs';
 
-SplashScreen.preventAutoHideAsync();
-
-export default function TabLayout() {
-  const colorScheme = useColorScheme();
+export default function RootLayout() {
   return (
-    <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-      <AnimatedSplashOverlay />
-      <AppTabs />
-    </ThemeProvider>
+    <Stack
+      screenOptions={{
+        headerTintColor: cores.primaria,
+        headerTitleStyle: { color: cores.texto, fontWeight: '700' },
+        headerStyle: { backgroundColor: cores.fundo },
+        headerShadowVisible: false,
+        headerBackTitle: 'Voltar',
+      }}
+    >
+      <Stack.Screen name="index" options={{ headerShown: false }} />
+      <Stack.Screen name="login" options={{ headerShown: false }} />
+      <Stack.Screen name="calcular" options={{ title: 'Calcular média' }} />
+      <Stack.Screen name="materias/index" options={{ title: 'Minhas médias' }} />
+      <Stack.Screen name="materias/nova" options={{ title: 'Nova matéria' }} />
+    </Stack>
   );
 }

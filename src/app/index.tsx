@@ -1,8 +1,10 @@
+import { useNotas } from '@/hooks/medias';
 import { useState } from 'react';
 import {
   KeyboardAvoidingView,
   Platform,
   Pressable,
+  ScrollView,
   StyleSheet,
   Text,
   TextInput,
@@ -10,126 +12,132 @@ import {
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 
-export default function LoginScreen() {
-  const [matricula, setMatricula] = useState('');
-  const [senha, setSenha] = useState('');
-  const [mostrarSenha, setMostrarSenha] = useState(false);
+type Linha = { id: number; nota: string; peso: string };
 
-  function handleEntrar() {
-    // TODO: sua lógica de login aqui
-  }
+export default function Index() {
+  const { linhas, media, adicionarNota, removerNota, atualizar, simular, meta } = useNotas();
 
-  // function handleEsqueciSenha() {
-  //   // TODO
-  // }
-
-  // function handleCriarConta() {
-  //   // TODO
-  // }
 
   return (
     <SafeAreaView style={styles.tela}>
       <KeyboardAvoidingView
-        style={styles.conteudo}
+        style={{ flex: 1 }}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <View style={styles.cabecalho}>
-          <View style={styles.logo}>
-            <Text style={styles.logoTexto}>x̄</Text>
-          </View>
+        <ScrollView contentContainerStyle={styles.conteudo} keyboardShouldPersistTaps="handled">
           <Text style={styles.titulo}>Média com pesos</Text>
-          <Text style={styles.subtitulo}>Entre para acompanhar suas notas</Text>
-        </View>
 
-        <View style={styles.form}>
-          <Text style={styles.rotulo}>Matrícula</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Ex: 8833212"
-            placeholderTextColor="#999"
-            // keyboardType="matricula-address"
-            autoCapitalize="none"
-            // autoComplete="matricula"
-            value={matricula}
-            onChangeText={setMatricula}
-          />
+          {linhas.map((linha, i) => (
+            <View key={linha.id} style={styles.grupo}>
+              <View style={styles.campo}>
+                <Text style={styles.rotulo}>Nota {i + 1}</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ex.: 7,5"
+                  placeholderTextColor="#999"
+                  keyboardType="decimal-pad"
+                  value={linha.nota}
+                  onChangeText={(t) => atualizar(linha.id, 'nota', t)}
+                />
+              </View>
 
-          <Text style={styles.rotulo}>Senha</Text>
-          <View style={styles.campoSenha}>
+              <View style={styles.campo}>
+                <Text style={styles.rotulo}>Peso {i + 1}</Text>
+                <TextInput
+                  style={styles.input}
+                  placeholder="Ex.: 2"
+                  placeholderTextColor="#999"
+                  keyboardType="decimal-pad"
+                  value={linha.peso}
+                  onChangeText={(t) => atualizar(linha.id, 'peso', t)}
+                />
+              </View>
+
+            </View>
+          ))}
+          <View style={styles.campo}>
+            <Text style={styles.rotulo}>Média desejada</Text>
             <TextInput
-              style={[styles.input, styles.inputSenha]}
-              placeholder="Sua senha"
+              style={styles.input}
+              placeholder="Ex.: 6,5"
               placeholderTextColor="#999"
-              secureTextEntry={!mostrarSenha}
-              autoComplete="password"
-              value={senha}
-              onChangeText={setSenha}
+              keyboardType="decimal-pad"
+              value={meta}
             />
-            <Pressable
-              style={styles.botaoOlho}
-              onPress={() => setMostrarSenha((v) => !v)}
-              hitSlop={10}
-            >
-              <Text style={styles.textoOlho}>{mostrarSenha ? 'Ocultar' : 'Mostrar'}</Text>
-            </Pressable>
           </View>
+          <Pressable
+            style={({ pressed }) => [styles.botaoSecundarioRemover, pressed && { opacity: 0.85 }]}
+            onPress={() => {
+              const ultimaLinha = linhas[linhas.length - 1];
+              if (ultimaLinha) removerNota(ultimaLinha.id);
+            }}
+          >
+            <Text style={styles.textoBotaoSecundarioRemover}>- Remover nota</Text>
+          </Pressable>
 
           <Pressable
-            style={({ pressed }) => [styles.botao, pressed && styles.botaoPressionado]}
-            onPress={handleEntrar}
+            style={({ pressed }) => [styles.botaoSecundario, pressed && { opacity: 0.85 }]}
+            onPress={adicionarNota}
           >
-            <Text style={styles.textoBotao}>Entrar</Text>
+            <Text style={styles.textoBotaoSecundario}>+ Adicionar nota</Text>
           </Pressable>
-        </View>
 
-        {/* <View style={styles.rodape}>
-          <Text style={styles.textoRodape}>Ainda não tem conta? </Text>
-          <Pressable onPress={handleCriarConta}>
-            <Text style={styles.link}>Criar conta</Text>
+          <Pressable
+            style={({ pressed }) => [styles.botao, pressed && { opacity: 0.85 }]}
+            onPress={simular}
+          >
+            <Text style={styles.textoBotao}>Enviar</Text>
           </Pressable>
-        </View> */}
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-const ROXO = '#6b5bd2';
-
 const styles = StyleSheet.create({
   tela: { flex: 1, backgroundColor: '#fff' },
-  conteudo: { flex: 1, paddingHorizontal: 24, justifyContent: 'center' },
-
-  cabecalho: { alignItems: 'center', marginBottom: 40 },
-  logo: {
-    width: 72, height: 72, borderRadius: 20, backgroundColor: '#f3f0ff',
-    alignItems: 'center', justifyContent: 'center', marginBottom: 16,
+  conteudo: { padding: 24, gap: 16 },
+  titulo: { fontSize: 26, fontWeight: '700', color: '#1a1a1a', marginBottom: 8 },
+  grupo: {
+    flexDirection: 'row',
+    gap: 12,
+    paddingBottom: 16,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
   },
-  logoTexto: { fontSize: 36, fontWeight: '800', color: ROXO },
-  titulo: { fontSize: 28, fontWeight: '700', color: '#1a1a1a' },
-  subtitulo: { fontSize: 15, color: '#666', marginTop: 6 },
-
-  form: { gap: 6 },
-  rotulo: { fontSize: 14, fontWeight: '600', color: '#333', marginTop: 10 },
+  campo: { flex: 1, gap: 6 },
+  rotulo: { fontSize: 14, fontWeight: '600', color: '#333' },
   input: {
-    borderWidth: 1, borderColor: '#ddd', borderRadius: 12,
-    paddingHorizontal: 14, paddingVertical: 14, fontSize: 16, color: '#1a1a1a',
-    backgroundColor: '#fafafa',
+    borderWidth: 1,
+    borderColor: '#ddd',
+    borderRadius: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    fontSize: 16,
+    color: '#1a1a1a',
   },
-  campoSenha: { justifyContent: 'center' },
-  inputSenha: { paddingRight: 80 },
-  botaoOlho: { position: 'absolute', right: 14 },
-  textoOlho: { color: ROXO, fontWeight: '600', fontSize: 14 },
-
-  linkEsqueci: { alignSelf: 'flex-end', marginTop: 8 },
-  link: { color: ROXO, fontWeight: '600', fontSize: 14 },
-
+  botaoSecundario: {
+    borderWidth: 1.5,
+    borderColor: '#6b5bd2',
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  textoBotaoSecundario: { color: '#6b5bd2', fontSize: 16, fontWeight: '700' },
+  botaoSecundarioRemover: {
+    borderWidth: 1.5,
+    borderColor: '#d25b5b',
+    backgroundColor: '#d25b5b',
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
+  },
+  textoBotaoSecundarioRemover: { color: '#ffffff', fontSize: 16, fontWeight: '700' },
   botao: {
-    backgroundColor: ROXO, borderRadius: 12, paddingVertical: 16,
-    alignItems: 'center', marginTop: 24,
+    backgroundColor: '#6b5bd2',
+    borderRadius: 10,
+    paddingVertical: 14,
+    alignItems: 'center',
   },
-  botaoPressionado: { opacity: 0.85 },
-  textoBotao: { color: '#fff', fontSize: 17, fontWeight: '700' },
-
-  rodape: { flexDirection: 'row', justifyContent: 'center', marginTop: 32 },
-  textoRodape: { color: '#666', fontSize: 14 },
+  textoBotao: { color: '#fff', fontSize: 16, fontWeight: '700' },
 });
