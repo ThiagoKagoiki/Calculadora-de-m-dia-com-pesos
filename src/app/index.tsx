@@ -15,7 +15,7 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 type Linha = { id: number; nota: string; peso: string };
 
 export default function Index() {
-  const { linhas, media, adicionarNota, removerNota, atualizar, simular, meta } = useNotas();
+  const { linhas, media, adicionarNota, removerNota, atualizar, simular, meta, setMeta, resp, setResp } = useNotas();
 
 
   return (
@@ -63,6 +63,7 @@ export default function Index() {
               placeholderTextColor="#999"
               keyboardType="decimal-pad"
               value={meta}
+              onChangeText={setMeta}
             />
           </View>
           <Pressable
@@ -88,6 +89,10 @@ export default function Index() {
           >
             <Text style={styles.textoBotao}>Enviar</Text>
           </Pressable>
+
+          <View>
+            <Text>{resp}</Text>
+          </View>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>

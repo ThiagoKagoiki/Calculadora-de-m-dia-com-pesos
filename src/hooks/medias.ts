@@ -8,6 +8,7 @@ export function useNotas() {
     const [linhas, setLinhas] = useState<Linha[]>([{ id: 1, nota: '', peso: '' }]);
     const [meta, setMeta] = useState("")
     const [media, setMedia] = useState<number | null>(null);
+    const [resp, setResp] = useState("")
     // 2. AÇÕES: o que a tela pode pedir pra fazer
     function adicionarNota() {
         setLinhas((atual) => [...atual, { id: Date.now(), nota: '', peso: '' }]);
@@ -36,10 +37,11 @@ export function useNotas() {
             }));
 
 
-        CalculaMedia(notas, pesoSemNota, Number(meta.replace(',', '.')));
+        const resposta =CalculaMedia(notas, pesoSemNota, Number(meta.replace(',', '.')));
         setMedia(null);
+        setResp(resposta)
     }
 
     // 4. O que a tela recebe
-    return { linhas, media, adicionarNota, removerNota, atualizar, meta, simular };
+    return { linhas, media, adicionarNota, removerNota, atualizar, meta, setMeta, simular, resp, setResp };
 }
